@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resume Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #f5f0e8;
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+
+    /* HEADER */
+    .header {
+      background: #2a2520;
+      padding: 24px 24px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: #E8A87C22;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -20px; left: 60px;
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      background: #7EB8C915;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 4px;
+    }
+    .header-label {
+      color: #a09888;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .sync-badge {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      transition: color 0.3s;
+    }
+    .sync-loading { color: #7EB8C9; }
+    .sync-saving  { color: #F0C070; }
+    .sync-saved   { color: #A8C5A0; }
+    .sync-error   { color: #F0A0A0; }
+
+    h1 {
+      font-family: 'Noto Serif TC', serif;
+      color: #faf8f5;
+      font-size: 26px;
+      font-weight: 700;
+      margin: 0 0 20px;
+      letter-spacing: 0.04em;
+    }
+
+    .overall-box {
+      background: #38322c;
+      border-radius: 16px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .overall-circle-wrap {
+      position: relative;
+      flex-shrink: 0;
+      width: 72px;
+      height: 72px;
+    }
+    .overall-circle-wrap svg { transform: rotate(-90deg); }
+    .overall-pct {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 800;
+      color: #E8A87C;
+    }
+    .overall-info { flex: 1; }
+    .overall-title {
+      font-family: 'Noto Serif TC', serif;
+      color: #faf8f5;
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .overall-count { color: #a09888; font-size: 13px; margin-bottom: 8px; }
+    .overall-bar-bg {
+      height: 6px;
+      background: #2a2520;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .overall-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #E8A87C, #F0C070);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    .last-saved {
+      color: #605850;
+      font-size: 11px;
+      margin-top: 10px;
+    }
+
+    /* PHASES */
+    .section-label {
+      font-size: 11px;
+      color: #a09888;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin: 0 0 10px;
+    }
+    .phases-wrap {
+      padding: 16px 20px 4px;
+    }
+    .phases-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .phase-card {
+      border-radius: 10px;
+      padding: 8px 14px;
+      flex-shrink: 0;
+      font-size: 12px;
+      border: 1.5px solid #e8e4de;
+      background: #f0ece4;
+      transition: all 0.3s;
+    }
+    .phase-card.active {
+      background: #fff;
+      border-color: #E8A87C;
+    }
+    .phase-card.done {
+      background: #E8A87C22;
+      border-color: #E8A87C;
+    }
+    .phase-day { color: #a09888; font-size: 10px; font-weight: 600; margin-bottom: 2px; }
+    .phase-name { color: #2a2520; font-weight: 700; }
+    .phase-card.done .phase-name { color: #C47A3A; }
+
+    /* CARDS */
+    .cards-wrap { padding: 16px 20px 0; }
+
+    .card {
+      background: #faf8f5;
+      border: 2px solid #e8e4de;
+      border-radius: 16px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 1px 4px #00000010;
+    }
+    .card.complete {
+      box-shadow: 0 2px 12px var(--color-alpha);
+      border-color: var(--color);
+      background: var(--color-light);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      padding: 14px 18px;
+      cursor: pointer;
+      gap: 14px;
+    }
+    .card-circle-wrap {
+      position: relative;
+      flex-shrink: 0;
+      width: 56px;
+      height: 56px;
+    }
+    .card-circle-wrap svg { transform: rotate(-90deg); }
+    .card-emoji {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .card-meta { flex: 1; }
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .card-title {
+      font-family: 'Noto Serif TC', serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: #2a2520;
+      letter-spacing: 0.02em;
+    }
+    .card.complete .card-title { color: var(--accent); }
+    .done-badge {
+      font-size: 11px;
+      color: #fff;
+      border-radius: 20px;
+      padding: 2px 8px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      background: var(--color);
+    }
+    .card-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-bar-bg {
+      flex: 1;
+      height: 4px;
+      background: #e8e4de;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .card-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+      background: var(--color);
+    }
+    .card-pct {
+      font-size: 12px;
+      font-weight: 700;
+      min-width: 36px;
+      text-align: right;
+      color: var(--accent);
+    }
+    .card-count {
+      font-size: 12px;
+      color: #a09888;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card-arrow {
+      display: inline-block;
+      transition: transform 0.25s;
+      font-size: 10px;
+    }
+    .card-arrow.open { transform: rotate(90deg); }
+
+    /* SUBTASKS */
+    .card-body { padding: 0 18px 14px; }
+    .card-divider { width: 100%; height: 1px; background: #e8e4de; margin-bottom: 10px; }
+    .hint-box {
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      line-height: 1.6;
+      border: 1px solid var(--color-border);
+      background: var(--color-hint);
+      color: var(--accent);
+    }
+    .task-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 9px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-bottom: 4px;
+      background: transparent;
+      transition: background 0.2s;
+      user-select: none;
+    }
+    .task-row:hover { background: #f0ece4; }
+    .task-row.done { background: var(--color-task-done); }
+    .task-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      border: 2px solid #c8c0b8;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+      transition: all 0.2s;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .task-row.done .task-check {
+      background: var(--color);
+      border-color: var(--color);
+    }
+    .task-label {
+      font-size: 14px;
+      color: #4a4540;
+      line-height: 1.5;
+      transition: all 0.2s;
+    }
+    .task-row.done .task-label {
+      color: var(--accent);
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+
+    /* FOOTER */
+    .footer-note {
+      padding: 12px 20px 0;
+      font-size: 12px;
+      color: #a09888;
+      text-align: center;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <p class="header-label">履歷製作進度</p>
+    <span class="sync-badge sync-loading" id="syncBadge">載入中…</span>
+  </div>
+  <h1>Resume Tracker</h1>
+  <div class="overall-box">
+    <div class="overall-circle-wrap">
+      <svg width="72" height="72">
+        <circle cx="36" cy="36" r="32" fill="none" stroke="#2a2520" stroke-width="5"/>
+        <circle cx="36" cy="36" r="32" fill="none" stroke="#E8A87C" stroke-width="5"
+          stroke-linecap="round" id="overallArc"
+          stroke-dasharray="0 201.06"
+          style="transition: stroke-dasharray 0.5s ease"/>
+      </svg>
+      <div class="overall-pct" id="overallPct">0%</div>
+    </div>
+    <div class="overall-info">
+      <div class="overall-title">整體完成度</div>
+      <div class="overall-count" id="overallCount">0 / 0 項任務完成</div>
+      <div class="overall-bar-bg">
+        <div class="overall-bar-fill" id="overallBar" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+  <p class="last-saved" id="lastSaved" style="display:none"></p>
+</div>
+
+<!-- PHASES -->
+<div class="phases-wrap">
+  <p class="section-label">建議時程</p>
+  <div class="phases-row" id="phasesRow"></div>
+</div>
+
+<!-- CARDS -->
+<div class="cards-wrap">
+  <p class="section-label">各項任務</p>
+  <div id="cardsContainer"></div>
+</div>
+
+<div class="footer-note">
+  🔗 此進度為共享儲存，任何人勾選後即時同步，重新整理可看到最新狀態
+</div>
+
+<script>
+const UPSTASH_URL   = "https://fluent-thrush-126067.upstash.io";
+const UPSTASH_TOKEN = "gQAAAAAAAexzAAIgcDFmNWIzZjAzY2UzNjM0Nzc1YjE5YjMyZDY4NDhkN2MxZA";
+const STORAGE_KEY   = "resume-tracker-v1";
+
+const SECTIONS = [
+  {
+    id: 1, title: "素材蒐集", emoji: "📋",
+    color: "#7EB8C9", accent: "#3A8BA0",
+    hint: "把所有經歷、活動、想法先列出來，不用在意格式",
+    subtasks: [
+      { id: "1-1", label: "列出所有社團、活動、打工、志工經歷" },
+      { id: "1-2", label: "列出自己覺得重要的個人特質（3–5 項）" },
+      { id: "1-3", label: "確認應徵目標職位與產業方向" },
+    ]
+  },
+  {
+    id: 2, title: "自傳", emoji: "✍️",
+    color: "#E8A87C", accent: "#C47A3A",
+    hint: "新鮮人自傳重點：用具體故事展現個人特質，而非條列經歷",
+    subtasks: [
+      { id: "2-1", label: "開場：用一個具體故事或轉折引出自己的特質" },
+      { id: "2-2", label: "求學歷程：印象最深的學習或挑戰，說明如何應對" },
+      { id: "2-3", label: "社團／活動／志工：擔任角色、遇到困難、學到什麼" },
+      { id: "2-4", label: "實習或打工（若有）：職場初體驗的收穫與反思" },
+      { id: "2-5", label: "個人特質：用上述故事帶出 2–3 個一致的核心特質" },
+      { id: "2-6", label: "結尾：對這份工作的期待，以及能為公司帶來什麼" },
+      { id: "2-7", label: "整篇自傳請人看過、給回饋、修改定稿" },
+    ]
+  },
+  {
+    id: 3, title: "基本資料", emoji: "👤",
+    color: "#A8C5A0", accent: "#4A8A42",
+    hint: null,
+    subtasks: [
+      { id: "3-1", label: "姓名、電話、Email" },
+      { id: "3-2", label: "大頭照（專業、背景乾淨）" },
+      { id: "3-3", label: "LinkedIn / 個人作品集連結（若有）" },
+    ]
+  },
+  {
+    id: 4, title: "學歷", emoji: "🎓",
+    color: "#B8A8D4", accent: "#6A4A9A",
+    hint: "新鮮人學歷是主力，課程、專題、成績都值得放",
+    subtasks: [
+      { id: "4-1", label: "學校、科系、畢業年份" },
+      { id: "4-2", label: "GPA（若優秀）或相關核心課程" },
+      { id: "4-3", label: "畢業專題或重要報告題目" },
+      { id: "4-4", label: "社團職位與參與紀錄" },
+    ]
+  },
+  {
+    id: 5, title: "實習／工作經歷", emoji: "💼",
+    color: "#F0C070", accent: "#C08020",
+    hint: "沒有正職經驗沒關係，打工、志工、課堂專案都可以寫",
+    subtasks: [
+      { id: "5-1", label: "職稱、單位名稱、期間" },
+      { id: "5-2", label: "主要職責（用動詞開頭，盡量量化）" },
+      { id: "5-3", label: "與應徵職位的關聯性說明" },
+    ]
+  },
+  {
+    id: 6, title: "技能與專長", emoji: "⚡",
+    color: "#F0A0A0", accent: "#C04040",
+    hint: null,
+    subtasks: [
+      { id: "6-1", label: "電腦與軟體技能（Office、設計工具等）" },
+      { id: "6-2", label: "語言能力（含證照考試分數）" },
+      { id: "6-3", label: "其他專業技能或證照" },
+    ]
+  },
+  {
+    id: 7, title: "最終審核", emoji: "✅",
+    color: "#A0C8C0", accent: "#308080",
+    hint: "用 HR 第一眼的角度看：重點夠不夠清楚？",
+    subtasks: [
+      { id: "7-1", label: "版面整齊、字型一致" },
+      { id: "7-2", label: "錯字與標點符號檢查" },
+      { id: "7-3", label: "整份履歷語氣與目標職位一致" },
+      { id: "7-4", label: "匯出 PDF，確認排版沒跑掉" },
+    ]
+  },
+];
+
+const PHASES = [
+  { label: "素材蒐集", day: "第 1 天",    sectionIds: [1] },
+  { label: "自傳撰寫", day: "第 2–4 天",  sectionIds: [2] },
+  { label: "資料填寫", day: "第 5–6 天",  sectionIds: [3,4,5,6] },
+  { label: "整合審核", day: "第 7–8 天",  sectionIds: [7] },
+];
+
+// State: taskId -> boolean
+let progress = {};
+
+// ── Upstash helpers ──────────────────────────────────────────
+async function upstashGet(key) {
+  const res = await fetch(`${UPSTASH_URL}/get/${key}`, {
+    headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
+  });
+  const json = await res.json();
+  return json.result; // null or string
+}
+
+async function upstashSet(key, value) {
+  await fetch(`${UPSTASH_URL}/set/${key}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${UPSTASH_TOKEN}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(value)
+  });
+}
+
+// ── Sync badge ───────────────────────────────────────────────
+function setSyncBadge(state) {
+  const el = document.getElementById("syncBadge");
+  const map = {
+    loading: ["載入中…",  "sync-loading"],
+    saving:  ["儲存中…",  "sync-saving"],
+    saved:   ["已同步 ✓", "sync-saved"],
+    error:   ["同步失敗", "sync-error"],
+  };
+  const [text, cls] = map[state] || map.saved;
+  el.textContent = text;
+  el.className = `sync-badge ${cls}`;
+}
+
+// ── Load from Upstash ────────────────────────────────────────
+async function loadProgress() {
+  setSyncBadge("loading");
+  try {
+    const raw = await upstashGet(STORAGE_KEY);
+    if (raw) progress = JSON.parse(raw);
+    setSyncBadge("saved");
+  } catch {
+    setSyncBadge("error");
+  }
+  render();
+}
+
+// ── Save to Upstash ──────────────────────────────────────────
+async function saveProgress() {
+  setSyncBadge("saving");
+  try {
+    await upstashSet(STORAGE_KEY, JSON.stringify(progress));
+    setSyncBadge("saved");
+    const el = document.getElementById("lastSaved");
+    el.style.display = "block";
+    el.textContent = `上次同步：${new Date().toLocaleTimeString("zh-TW", { hour:"2-digit", minute:"2-digit" })}`;
+  } catch {
+    setSyncBadge("error");
+  }
+}
+
+// ── Toggle a task ────────────────────────────────────────────
+function toggleTask(taskId) {
+  progress[taskId] = !progress[taskId];
+  saveProgress();
+  render();
+}
+
+// ── SVG circle arc helper ────────────────────────────────────
+function arcDash(pct, r) {
+  const circ = 2 * Math.PI * r;
+  return `${(pct / 100) * circ} ${circ}`;
+}
+
+// ── Render everything ────────────────────────────────────────
+function render() {
+  renderOverall();
+  renderPhases();
+  renderCards();
+}
+
+function renderOverall() {
+  const all   = SECTIONS.flatMap(s => s.subtasks);
+  const done  = all.filter(t => progress[t.id]).length;
+  const total = all.length;
+  const pct   = total ? Math.round((done / total) * 100) : 0;
+
+  document.getElementById("overallPct").textContent   = `${pct}%`;
+  document.getElementById("overallCount").textContent = `${done} / ${total} 項任務完成`;
+  document.getElementById("overallBar").style.width   = `${pct}%`;
+  document.getElementById("overallArc").setAttribute("stroke-dasharray", arcDash(pct, 32));
+}
+
+function renderPhases() {
+  const row = document.getElementById("phasesRow");
+  row.innerHTML = "";
+
+  PHASES.forEach(ph => {
+    const allDone = ph.sectionIds.every(sid => {
+      const sec = SECTIONS.find(s => s.id === sid);
+      return sec.subtasks.every(t => progress[t.id]);
+    });
+    const hasRemaining = ph.sectionIds.some(sid => {
+      const sec = SECTIONS.find(s => s.id === sid);
+      return sec.subtasks.some(t => !progress[t.id]);
+    });
+
+    const card = document.createElement("div");
+    card.className = `phase-card${allDone ? " done" : hasRemaining ? " active" : ""}`;
+    card.innerHTML = `
+      <div class="phase-day">${ph.day}</div>
+      <div class="phase-name">${allDone ? "✓ " : hasRemaining ? "▶ " : ""}${ph.label}</div>
+    `;
+    row.appendChild(card);
+  });
+}
+
+// Track open/closed state of cards
+const openState = { 2: true }; // self-intro open by default
+
+function renderCards() {
+  const container = document.getElementById("cardsContainer");
+
+  // Preserve scroll position
+  const scrollY = window.scrollY;
+
+  container.innerHTML = "";
+
+  SECTIONS.forEach(sec => {
+    const done    = sec.subtasks.filter(t => progress[t.id]).length;
+    const total   = sec.subtasks.length;
+    const pct     = Math.round((done / total) * 100);
+    const complete = pct === 100;
+    const isOpen  = !!openState[sec.id];
+
+    const alpha = sec.color + "44";
+    const light = sec.color + "22";
+    const hint  = sec.color + "20";
+    const border= sec.color + "60";
+    const taskDone = sec.color + "18";
+
+    const card = document.createElement("div");
+    card.className = `card${complete ? " complete" : ""}`;
+    card.style.setProperty("--color",          sec.color);
+    card.style.setProperty("--accent",         sec.accent);
+    card.style.setProperty("--color-alpha",    alpha);
+    card.style.setProperty("--color-light",    light);
+    card.style.setProperty("--color-hint",     hint);
+    card.style.setProperty("--color-border",   border);
+    card.style.setProperty("--color-task-done",taskDone);
+
+    const circ = 2 * Math.PI * 24;
+    const dash = arcDash(pct, 24);
+
+    card.innerHTML = `
+      <div class="card-header" data-id="${sec.id}">
+        <div class="card-circle-wrap">
+          <svg width="56" height="56">
+            <circle cx="28" cy="28" r="24" fill="none" stroke="#e8e4de" stroke-width="5"/>
+            <circle cx="28" cy="28" r="24" fill="none" stroke="${sec.color}" stroke-width="5"
+              stroke-linecap="round" stroke-dasharray="${dash}"/>
+          </svg>
+          <div class="card-emoji">${complete ? "✓" : sec.emoji}</div>
+        </div>
+        <div class="card-meta">
+          <div class="card-title-row">
+            <span class="card-title">${sec.title}</span>
+            ${complete ? `<span class="done-badge">完成</span>` : ""}
+          </div>
+          <div class="card-bar-row">
+            <div class="card-bar-bg"><div class="card-bar-fill" style="width:${pct}%"></div></div>
+            <span class="card-pct">${pct}%</span>
+          </div>
+        </div>
+        <div class="card-count">
+          ${done}/${total}
+          <span class="card-arrow${isOpen ? " open" : ""}">▶</span>
+        </div>
+      </div>
+      ${isOpen ? `
+      <div class="card-body">
+        <div class="card-divider"></div>
+        ${sec.hint ? `<div class="hint-box">💡 ${sec.hint}</div>` : ""}
+        ${sec.subtasks.map(task => `
+          <div class="task-row${progress[task.id] ? " done" : ""}" data-task="${task.id}">
+            <div class="task-check">${progress[task.id] ? "✓" : ""}</div>
+            <span class="task-label">${task.label}</span>
+          </div>
+        `).join("")}
+      </div>` : ""}
+    `;
+
+    container.appendChild(card);
+  });
+
+  // Events: header toggle
+  container.querySelectorAll(".card-header").forEach(el => {
+    el.addEventListener("click", () => {
+      const id = parseInt(el.dataset.id);
+      openState[id] = !openState[id];
+      renderCards();
+    });
+  });
+
+  // Events: task toggle
+  container.querySelectorAll(".task-row").forEach(el => {
+    el.addEventListener("click", e => {
+      e.stopPropagation();
+      toggleTask(el.dataset.task);
+    });
+  });
+
+  window.scrollTo(0, scrollY);
+}
+
+// ── Init ─────────────────────────────────────────────────────
+loadProgress();
+</script>
+</body>
+</html>
