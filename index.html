@@ -478,22 +478,26 @@ let progress = {};
 
 // ── Upstash helpers ──────────────────────────────────────────
 async function upstashGet(key) {
-  const res = await fetch(`${UPSTASH_URL}/get/${key}`, {
+  const res = await fetch(`${UPSTASH_URL}/get/${encodeURIComponent(key)}`, {
+    method: "GET",
     headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
   });
+  if (!res.ok) throw new Error("GET failed: " + res.status);
   const json = await res.json();
-  return json.result; // null or string
+  return json.result;
 }
 
 async function upstashSet(key, value) {
-  await fetch(`${UPSTASH_URL}/set/${key}`, {
+  // Use pipeline endpoint to safely handle JSON values
+  const res = await fetch(`${UPSTASH_URL}/pipeline`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${UPSTASH_TOKEN}`,
       "Content-Type": "application/json"
     },
-    body: JSON.stringify(value)
+    body: JSON.stringify([["SET", key, value]])
   });
+  if (!res.ok) throw new Error("SET failed: " + res.status);
 }
 
 // ── Sync badge ───────────────────────────────────────────────
