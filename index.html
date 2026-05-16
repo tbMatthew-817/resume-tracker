@@ -7,337 +7,68 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: #f5f0e8;
-      font-family: system-ui, -apple-system, sans-serif;
-      min-height: 100vh;
-      padding-bottom: 60px;
-    }
-
-    /* HEADER */
-    .header {
-      background: #2a2520;
-      padding: 24px 24px 28px;
-      position: relative;
-      overflow: hidden;
-    }
-    .header::before {
-      content: '';
-      position: absolute;
-      top: -40px; right: -40px;
-      width: 180px; height: 180px;
-      border-radius: 50%;
-      background: #E8A87C22;
-    }
-    .header::after {
-      content: '';
-      position: absolute;
-      bottom: -20px; left: 60px;
-      width: 100px; height: 100px;
-      border-radius: 50%;
-      background: #7EB8C915;
-    }
-    .header-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 4px;
-    }
-    .header-label {
-      color: #a09888;
-      font-size: 12px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      font-weight: 600;
-    }
-    .sync-badge {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      transition: color 0.3s;
-    }
-    .sync-loading { color: #7EB8C9; }
-    .sync-saving  { color: #F0C070; }
-    .sync-saved   { color: #A8C5A0; }
-    .sync-error   { color: #F0A0A0; }
-
-    h1 {
-      font-family: 'Noto Serif TC', serif;
-      color: #faf8f5;
-      font-size: 26px;
-      font-weight: 700;
-      margin: 0 0 20px;
-      letter-spacing: 0.04em;
-    }
-
-    .overall-box {
-      background: #38322c;
-      border-radius: 16px;
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .overall-circle-wrap {
-      position: relative;
-      flex-shrink: 0;
-      width: 72px;
-      height: 72px;
-    }
+    body { background: #f5f0e8; font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; padding-bottom: 60px; }
+    .header { background: #2a2520; padding: 24px 24px 28px; position: relative; overflow: hidden; }
+    .header::before { content: ''; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; border-radius: 50%; background: #E8A87C22; }
+    .header::after { content: ''; position: absolute; bottom: -20px; left: 60px; width: 100px; height: 100px; border-radius: 50%; background: #7EB8C915; }
+    .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+    .header-label { color: #a09888; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; }
+    .sync-badge { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; transition: color 0.3s; }
+    .sync-loading { color: #7EB8C9; } .sync-saving { color: #F0C070; } .sync-saved { color: #A8C5A0; } .sync-error { color: #F0A0A0; }
+    h1 { font-family: 'Noto Serif TC', serif; color: #faf8f5; font-size: 26px; font-weight: 700; margin: 0 0 20px; letter-spacing: 0.04em; }
+    .overall-box { background: #38322c; border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; }
+    .overall-circle-wrap { position: relative; flex-shrink: 0; width: 72px; height: 72px; }
     .overall-circle-wrap svg { transform: rotate(-90deg); }
-    .overall-pct {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      font-weight: 800;
-      color: #E8A87C;
-    }
+    .overall-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: #E8A87C; }
     .overall-info { flex: 1; }
-    .overall-title {
-      font-family: 'Noto Serif TC', serif;
-      color: #faf8f5;
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
+    .overall-title { font-family: 'Noto Serif TC', serif; color: #faf8f5; font-size: 15px; font-weight: 600; margin-bottom: 4px; }
     .overall-count { color: #a09888; font-size: 13px; margin-bottom: 8px; }
-    .overall-bar-bg {
-      height: 6px;
-      background: #2a2520;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    .overall-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #E8A87C, #F0C070);
-      border-radius: 4px;
-      transition: width 0.5s ease;
-    }
-    .last-saved {
-      color: #605850;
-      font-size: 11px;
-      margin-top: 10px;
-    }
-
-    /* PHASES */
-    .section-label {
-      font-size: 11px;
-      color: #a09888;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      font-weight: 600;
-      margin: 0 0 10px;
-    }
-    .phases-wrap {
-      padding: 16px 20px 4px;
-    }
-    .phases-row {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-    }
-    .phase-card {
-      border-radius: 10px;
-      padding: 8px 14px;
-      flex-shrink: 0;
-      font-size: 12px;
-      border: 1.5px solid #e8e4de;
-      background: #f0ece4;
-      transition: all 0.3s;
-    }
-    .phase-card.active {
-      background: #fff;
-      border-color: #E8A87C;
-    }
-    .phase-card.done {
-      background: #E8A87C22;
-      border-color: #E8A87C;
-    }
+    .overall-bar-bg { height: 6px; background: #2a2520; border-radius: 4px; overflow: hidden; }
+    .overall-bar-fill { height: 100%; background: linear-gradient(90deg, #E8A87C, #F0C070); border-radius: 4px; transition: width 0.5s ease; }
+    .last-saved { color: #605850; font-size: 11px; margin-top: 10px; }
+    .section-label { font-size: 11px; color: #a09888; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; margin: 0 0 10px; }
+    .phases-wrap { padding: 16px 20px 4px; }
+    .phases-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+    .phase-card { border-radius: 10px; padding: 8px 14px; flex-shrink: 0; font-size: 12px; border: 1.5px solid #e8e4de; background: #f0ece4; transition: all 0.3s; }
+    .phase-card.active { background: #fff; border-color: #E8A87C; }
+    .phase-card.done { background: #E8A87C22; border-color: #E8A87C; }
     .phase-day { color: #a09888; font-size: 10px; font-weight: 600; margin-bottom: 2px; }
     .phase-name { color: #2a2520; font-weight: 700; }
     .phase-card.done .phase-name { color: #C47A3A; }
-
-    /* CARDS */
     .cards-wrap { padding: 16px 20px 0; }
-
-    .card {
-      background: #faf8f5;
-      border: 2px solid #e8e4de;
-      border-radius: 16px;
-      margin-bottom: 12px;
-      overflow: hidden;
-      transition: all 0.3s ease;
-      box-shadow: 0 1px 4px #00000010;
-    }
-    .card.complete {
-      box-shadow: 0 2px 12px var(--color-alpha);
-      border-color: var(--color);
-      background: var(--color-light);
-    }
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      padding: 14px 18px;
-      cursor: pointer;
-      gap: 14px;
-    }
-    .card-circle-wrap {
-      position: relative;
-      flex-shrink: 0;
-      width: 56px;
-      height: 56px;
-    }
+    .card { background: #faf8f5; border: 2px solid #e8e4de; border-radius: 16px; margin-bottom: 12px; overflow: hidden; transition: all 0.3s ease; box-shadow: 0 1px 4px #00000010; }
+    .card.complete { box-shadow: 0 2px 12px var(--color-alpha); border-color: var(--color); background: var(--color-light); }
+    .card-header { display: flex; align-items: center; padding: 14px 18px; cursor: pointer; gap: 14px; user-select: none; }
+    .card-circle-wrap { position: relative; flex-shrink: 0; width: 56px; height: 56px; }
     .card-circle-wrap svg { transform: rotate(-90deg); }
-    .card-emoji {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-    }
+    .card-emoji { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; }
     .card-meta { flex: 1; }
-    .card-title-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 4px;
-    }
-    .card-title {
-      font-family: 'Noto Serif TC', serif;
-      font-size: 17px;
-      font-weight: 700;
-      color: #2a2520;
-      letter-spacing: 0.02em;
-    }
+    .card-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .card-title { font-family: 'Noto Serif TC', serif; font-size: 17px; font-weight: 700; color: #2a2520; letter-spacing: 0.02em; }
     .card.complete .card-title { color: var(--accent); }
-    .done-badge {
-      font-size: 11px;
-      color: #fff;
-      border-radius: 20px;
-      padding: 2px 8px;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      background: var(--color);
-    }
-    .card-bar-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .card-bar-bg {
-      flex: 1;
-      height: 4px;
-      background: #e8e4de;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    .card-bar-fill {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 0.5s ease;
-      background: var(--color);
-    }
-    .card-pct {
-      font-size: 12px;
-      font-weight: 700;
-      min-width: 36px;
-      text-align: right;
-      color: var(--accent);
-    }
-    .card-count {
-      font-size: 12px;
-      color: #a09888;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .card-arrow {
-      display: inline-block;
-      transition: transform 0.25s;
-      font-size: 10px;
-    }
+    .done-badge { font-size: 11px; color: #fff; border-radius: 20px; padding: 2px 8px; font-weight: 600; letter-spacing: 0.04em; background: var(--color); }
+    .card-bar-row { display: flex; align-items: center; gap: 8px; }
+    .card-bar-bg { flex: 1; height: 4px; background: #e8e4de; border-radius: 4px; overflow: hidden; }
+    .card-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; background: var(--color); }
+    .card-pct { font-size: 12px; font-weight: 700; min-width: 36px; text-align: right; color: var(--accent); }
+    .card-count { font-size: 12px; color: #a09888; flex-shrink: 0; display: flex; align-items: center; gap: 6px; }
+    .card-arrow { display: inline-block; transition: transform 0.25s; font-size: 10px; }
     .card-arrow.open { transform: rotate(90deg); }
-
-    /* SUBTASKS */
     .card-body { padding: 0 18px 14px; }
     .card-divider { width: 100%; height: 1px; background: #e8e4de; margin-bottom: 10px; }
-    .hint-box {
-      border-radius: 10px;
-      padding: 8px 12px;
-      margin-bottom: 10px;
-      font-size: 12px;
-      line-height: 1.6;
-      border: 1px solid var(--color-border);
-      background: var(--color-hint);
-      color: var(--accent);
-    }
-    .task-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 9px 12px;
-      border-radius: 10px;
-      cursor: pointer;
-      margin-bottom: 4px;
-      background: transparent;
-      transition: background 0.2s;
-      user-select: none;
-    }
+    .hint-box { border-radius: 10px; padding: 8px 12px; margin-bottom: 10px; font-size: 12px; line-height: 1.6; border: 1px solid var(--color-border); background: var(--color-hint); color: var(--accent); }
+    .task-row { display: flex; align-items: flex-start; gap: 12px; padding: 9px 12px; border-radius: 10px; cursor: pointer; margin-bottom: 4px; background: transparent; transition: background 0.2s; user-select: none; }
     .task-row:hover { background: #f0ece4; }
     .task-row.done { background: var(--color-task-done); }
-    .task-check {
-      width: 20px;
-      height: 20px;
-      border-radius: 6px;
-      border: 2px solid #c8c0b8;
-      background: transparent;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 1px;
-      transition: all 0.2s;
-      font-size: 12px;
-      font-weight: 700;
-      color: #fff;
-    }
-    .task-row.done .task-check {
-      background: var(--color);
-      border-color: var(--color);
-    }
-    .task-label {
-      font-size: 14px;
-      color: #4a4540;
-      line-height: 1.5;
-      transition: all 0.2s;
-    }
-    .task-row.done .task-label {
-      color: var(--accent);
-      text-decoration: line-through;
-      opacity: 0.7;
-    }
-
-    /* FOOTER */
-    .footer-note {
-      padding: 12px 20px 0;
-      font-size: 12px;
-      color: #a09888;
-      text-align: center;
-      line-height: 1.6;
-    }
+    .task-check { width: 20px; height: 20px; border-radius: 6px; border: 2px solid #c8c0b8; background: transparent; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; transition: all 0.2s; font-size: 12px; font-weight: 700; color: #fff; }
+    .task-row.done .task-check { background: var(--color); border-color: var(--color); }
+    .task-label { font-size: 14px; color: #4a4540; line-height: 1.5; transition: all 0.2s; }
+    .task-row.done .task-label { color: var(--accent); text-decoration: line-through; opacity: 0.7; }
+    .footer-note { padding: 12px 20px 0; font-size: 12px; color: #a09888; text-align: center; line-height: 1.6; }
   </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="header">
   <div class="header-top">
     <p class="header-label">履歷製作進度</p>
@@ -349,8 +80,7 @@
       <svg width="72" height="72">
         <circle cx="36" cy="36" r="32" fill="none" stroke="#2a2520" stroke-width="5"/>
         <circle cx="36" cy="36" r="32" fill="none" stroke="#E8A87C" stroke-width="5"
-          stroke-linecap="round" id="overallArc"
-          stroke-dasharray="0 201.06"
+          stroke-linecap="round" id="overallArc" stroke-dasharray="0 201.06"
           style="transition: stroke-dasharray 0.5s ease"/>
       </svg>
       <div class="overall-pct" id="overallPct">0%</div>
@@ -358,21 +88,17 @@
     <div class="overall-info">
       <div class="overall-title">整體完成度</div>
       <div class="overall-count" id="overallCount">0 / 0 項任務完成</div>
-      <div class="overall-bar-bg">
-        <div class="overall-bar-fill" id="overallBar" style="width:0%"></div>
-      </div>
+      <div class="overall-bar-bg"><div class="overall-bar-fill" id="overallBar" style="width:0%"></div></div>
     </div>
   </div>
   <p class="last-saved" id="lastSaved" style="display:none"></p>
 </div>
 
-<!-- PHASES -->
 <div class="phases-wrap">
   <p class="section-label">建議時程</p>
   <div class="phases-row" id="phasesRow"></div>
 </div>
 
-<!-- CARDS -->
 <div class="cards-wrap">
   <p class="section-label">各項任務</p>
   <div id="cardsContainer"></div>
@@ -467,28 +193,26 @@ const SECTIONS = [
 ];
 
 const PHASES = [
-  { label: "素材蒐集", day: "第 1 天",    sectionIds: [1] },
-  { label: "自傳撰寫", day: "第 2–4 天",  sectionIds: [2] },
-  { label: "資料填寫", day: "第 5–6 天",  sectionIds: [3,4,5,6] },
-  { label: "整合審核", day: "第 7–8 天",  sectionIds: [7] },
+  { label: "素材蒐集", day: "第 1 天",   sectionIds: [1] },
+  { label: "自傳撰寫", day: "第 2–4 天", sectionIds: [2] },
+  { label: "資料填寫", day: "第 5–6 天", sectionIds: [3,4,5,6] },
+  { label: "整合審核", day: "第 7–8 天", sectionIds: [7] },
 ];
 
-// State: taskId -> boolean
 let progress = {};
+const openState = { 2: true };
 
-// ── Upstash helpers ──────────────────────────────────────────
+// ── Upstash ──────────────────────────────────────────────────
 async function upstashGet(key) {
   const res = await fetch(`${UPSTASH_URL}/get/${encodeURIComponent(key)}`, {
-    method: "GET",
     headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
   });
-  if (!res.ok) throw new Error("GET failed: " + res.status);
+  if (!res.ok) throw new Error("GET " + res.status);
   const json = await res.json();
   return json.result;
 }
 
 async function upstashSet(key, value) {
-  // Use pipeline endpoint to safely handle JSON values
   const res = await fetch(`${UPSTASH_URL}/pipeline`, {
     method: "POST",
     headers: {
@@ -497,37 +221,41 @@ async function upstashSet(key, value) {
     },
     body: JSON.stringify([["SET", key, value]])
   });
-  if (!res.ok) throw new Error("SET failed: " + res.status);
+  if (!res.ok) throw new Error("SET " + res.status);
 }
 
-// ── Sync badge ───────────────────────────────────────────────
+// ── Badge ────────────────────────────────────────────────────
 function setSyncBadge(state) {
   const el = document.getElementById("syncBadge");
   const map = {
     loading: ["載入中…",  "sync-loading"],
     saving:  ["儲存中…",  "sync-saving"],
     saved:   ["已同步 ✓", "sync-saved"],
-    error:   ["同步失敗", "sync-error"],
+    error:   ["同步失敗 (離線模式)", "sync-error"],
   };
   const [text, cls] = map[state] || map.saved;
   el.textContent = text;
-  el.className = `sync-badge ${cls}`;
+  el.className = "sync-badge " + cls;
 }
 
-// ── Load from Upstash ────────────────────────────────────────
+// ── Load ─────────────────────────────────────────────────────
 async function loadProgress() {
   setSyncBadge("loading");
   try {
     const raw = await upstashGet(STORAGE_KEY);
-    if (raw) progress = JSON.parse(raw);
+    if (raw) {
+      try { progress = JSON.parse(raw); } catch(e) { console.warn("parse error", e); }
+    }
     setSyncBadge("saved");
-  } catch {
+  } catch(e) {
+    console.warn("Upstash load failed:", e);
     setSyncBadge("error");
   }
+  // Always render regardless of Upstash success/failure
   render();
 }
 
-// ── Save to Upstash ──────────────────────────────────────────
+// ── Save ─────────────────────────────────────────────────────
 async function saveProgress() {
   setSyncBadge("saving");
   try {
@@ -535,26 +263,27 @@ async function saveProgress() {
     setSyncBadge("saved");
     const el = document.getElementById("lastSaved");
     el.style.display = "block";
-    el.textContent = `上次同步：${new Date().toLocaleTimeString("zh-TW", { hour:"2-digit", minute:"2-digit" })}`;
-  } catch {
+    el.textContent = "上次同步：" + new Date().toLocaleTimeString("zh-TW", { hour:"2-digit", minute:"2-digit" });
+  } catch(e) {
+    console.warn("Upstash save failed:", e);
     setSyncBadge("error");
   }
 }
 
-// ── Toggle a task ────────────────────────────────────────────
+// ── Toggle ───────────────────────────────────────────────────
 function toggleTask(taskId) {
   progress[taskId] = !progress[taskId];
-  saveProgress();
   render();
+  saveProgress();
 }
 
-// ── SVG circle arc helper ────────────────────────────────────
+// ── Arc helper ───────────────────────────────────────────────
 function arcDash(pct, r) {
   const circ = 2 * Math.PI * r;
-  return `${(pct / 100) * circ} ${circ}`;
+  return ((pct / 100) * circ) + " " + circ;
 }
 
-// ── Render everything ────────────────────────────────────────
+// ── Render ───────────────────────────────────────────────────
 function render() {
   renderOverall();
   renderPhases();
@@ -562,131 +291,109 @@ function render() {
 }
 
 function renderOverall() {
-  const all   = SECTIONS.flatMap(s => s.subtasks);
-  const done  = all.filter(t => progress[t.id]).length;
+  const all   = SECTIONS.flatMap(function(s) { return s.subtasks; });
+  const done  = all.filter(function(t) { return progress[t.id]; }).length;
   const total = all.length;
   const pct   = total ? Math.round((done / total) * 100) : 0;
-
-  document.getElementById("overallPct").textContent   = `${pct}%`;
-  document.getElementById("overallCount").textContent = `${done} / ${total} 項任務完成`;
-  document.getElementById("overallBar").style.width   = `${pct}%`;
+  document.getElementById("overallPct").textContent   = pct + "%";
+  document.getElementById("overallCount").textContent = done + " / " + total + " 項任務完成";
+  document.getElementById("overallBar").style.width   = pct + "%";
   document.getElementById("overallArc").setAttribute("stroke-dasharray", arcDash(pct, 32));
 }
 
 function renderPhases() {
   const row = document.getElementById("phasesRow");
   row.innerHTML = "";
-
-  PHASES.forEach(ph => {
-    const allDone = ph.sectionIds.every(sid => {
-      const sec = SECTIONS.find(s => s.id === sid);
-      return sec.subtasks.every(t => progress[t.id]);
+  PHASES.forEach(function(ph) {
+    const allDone = ph.sectionIds.every(function(sid) {
+      const sec = SECTIONS.find(function(s) { return s.id === sid; });
+      return sec.subtasks.every(function(t) { return progress[t.id]; });
     });
-    const hasRemaining = ph.sectionIds.some(sid => {
-      const sec = SECTIONS.find(s => s.id === sid);
-      return sec.subtasks.some(t => !progress[t.id]);
+    const hasRemaining = ph.sectionIds.some(function(sid) {
+      const sec = SECTIONS.find(function(s) { return s.id === sid; });
+      return sec.subtasks.some(function(t) { return !progress[t.id]; });
     });
-
     const card = document.createElement("div");
-    card.className = `phase-card${allDone ? " done" : hasRemaining ? " active" : ""}`;
-    card.innerHTML = `
-      <div class="phase-day">${ph.day}</div>
-      <div class="phase-name">${allDone ? "✓ " : hasRemaining ? "▶ " : ""}${ph.label}</div>
-    `;
+    card.className = "phase-card" + (allDone ? " done" : hasRemaining ? " active" : "");
+    card.innerHTML = "<div class='phase-day'>" + ph.day + "</div><div class='phase-name'>" +
+      (allDone ? "✓ " : hasRemaining ? "▶ " : "") + ph.label + "</div>";
     row.appendChild(card);
   });
 }
 
-// Track open/closed state of cards
-const openState = { 2: true }; // self-intro open by default
-
 function renderCards() {
   const container = document.getElementById("cardsContainer");
-
-  // Preserve scroll position
   const scrollY = window.scrollY;
-
   container.innerHTML = "";
 
-  SECTIONS.forEach(sec => {
-    const done    = sec.subtasks.filter(t => progress[t.id]).length;
+  SECTIONS.forEach(function(sec) {
+    const done    = sec.subtasks.filter(function(t) { return progress[t.id]; }).length;
     const total   = sec.subtasks.length;
     const pct     = Math.round((done / total) * 100);
     const complete = pct === 100;
     const isOpen  = !!openState[sec.id];
 
-    const alpha = sec.color + "44";
-    const light = sec.color + "22";
-    const hint  = sec.color + "20";
-    const border= sec.color + "60";
-    const taskDone = sec.color + "18";
-
     const card = document.createElement("div");
-    card.className = `card${complete ? " complete" : ""}`;
-    card.style.setProperty("--color",          sec.color);
-    card.style.setProperty("--accent",         sec.accent);
-    card.style.setProperty("--color-alpha",    alpha);
-    card.style.setProperty("--color-light",    light);
-    card.style.setProperty("--color-hint",     hint);
-    card.style.setProperty("--color-border",   border);
-    card.style.setProperty("--color-task-done",taskDone);
+    card.className = "card" + (complete ? " complete" : "");
+    card.style.setProperty("--color",           sec.color);
+    card.style.setProperty("--accent",          sec.accent);
+    card.style.setProperty("--color-alpha",     sec.color + "44");
+    card.style.setProperty("--color-light",     sec.color + "22");
+    card.style.setProperty("--color-hint",      sec.color + "20");
+    card.style.setProperty("--color-border",    sec.color + "60");
+    card.style.setProperty("--color-task-done", sec.color + "18");
 
-    const circ = 2 * Math.PI * 24;
-    const dash = arcDash(pct, 24);
+    const subtasksHTML = sec.subtasks.map(function(task) {
+      return "<div class='task-row" + (progress[task.id] ? " done" : "") + "' data-task='" + task.id + "'>" +
+        "<div class='task-check'>" + (progress[task.id] ? "✓" : "") + "</div>" +
+        "<span class='task-label'>" + task.label + "</span></div>";
+    }).join("");
 
-    card.innerHTML = `
-      <div class="card-header" data-id="${sec.id}">
-        <div class="card-circle-wrap">
-          <svg width="56" height="56">
-            <circle cx="28" cy="28" r="24" fill="none" stroke="#e8e4de" stroke-width="5"/>
-            <circle cx="28" cy="28" r="24" fill="none" stroke="${sec.color}" stroke-width="5"
-              stroke-linecap="round" stroke-dasharray="${dash}"/>
-          </svg>
-          <div class="card-emoji">${complete ? "✓" : sec.emoji}</div>
-        </div>
-        <div class="card-meta">
-          <div class="card-title-row">
-            <span class="card-title">${sec.title}</span>
-            ${complete ? `<span class="done-badge">完成</span>` : ""}
-          </div>
-          <div class="card-bar-row">
-            <div class="card-bar-bg"><div class="card-bar-fill" style="width:${pct}%"></div></div>
-            <span class="card-pct">${pct}%</span>
-          </div>
-        </div>
-        <div class="card-count">
-          ${done}/${total}
-          <span class="card-arrow${isOpen ? " open" : ""}">▶</span>
-        </div>
-      </div>
-      ${isOpen ? `
-      <div class="card-body">
-        <div class="card-divider"></div>
-        ${sec.hint ? `<div class="hint-box">💡 ${sec.hint}</div>` : ""}
-        ${sec.subtasks.map(task => `
-          <div class="task-row${progress[task.id] ? " done" : ""}" data-task="${task.id}">
-            <div class="task-check">${progress[task.id] ? "✓" : ""}</div>
-            <span class="task-label">${task.label}</span>
-          </div>
-        `).join("")}
-      </div>` : ""}
-    `;
+    card.innerHTML =
+      "<div class='card-header' data-id='" + sec.id + "'>" +
+        "<div class='card-circle-wrap'>" +
+          "<svg width='56' height='56'>" +
+            "<circle cx='28' cy='28' r='24' fill='none' stroke='#e8e4de' stroke-width='5'/>" +
+            "<circle cx='28' cy='28' r='24' fill='none' stroke='" + sec.color + "' stroke-width='5' stroke-linecap='round' stroke-dasharray='" + arcDash(pct, 24) + "'/>" +
+          "</svg>" +
+          "<div class='card-emoji'>" + (complete ? "✓" : sec.emoji) + "</div>" +
+        "</div>" +
+        "<div class='card-meta'>" +
+          "<div class='card-title-row'>" +
+            "<span class='card-title'>" + sec.title + "</span>" +
+            (complete ? "<span class='done-badge'>完成</span>" : "") +
+          "</div>" +
+          "<div class='card-bar-row'>" +
+            "<div class='card-bar-bg'><div class='card-bar-fill' style='width:" + pct + "%'></div></div>" +
+            "<span class='card-pct'>" + pct + "%</span>" +
+          "</div>" +
+        "</div>" +
+        "<div class='card-count'>" + done + "/" + total +
+          "<span class='card-arrow" + (isOpen ? " open" : "") + "'>▶</span>" +
+        "</div>" +
+      "</div>" +
+      (isOpen ?
+        "<div class='card-body'>" +
+          "<div class='card-divider'></div>" +
+          (sec.hint ? "<div class='hint-box'>💡 " + sec.hint + "</div>" : "") +
+          subtasksHTML +
+        "</div>" : "");
 
     container.appendChild(card);
   });
 
-  // Events: header toggle
-  container.querySelectorAll(".card-header").forEach(el => {
-    el.addEventListener("click", () => {
+  // Header click → toggle open
+  container.querySelectorAll(".card-header").forEach(function(el) {
+    el.addEventListener("click", function() {
       const id = parseInt(el.dataset.id);
       openState[id] = !openState[id];
       renderCards();
     });
   });
 
-  // Events: task toggle
-  container.querySelectorAll(".task-row").forEach(el => {
-    el.addEventListener("click", e => {
+  // Task click → toggle done
+  container.querySelectorAll(".task-row").forEach(function(el) {
+    el.addEventListener("click", function(e) {
       e.stopPropagation();
       toggleTask(el.dataset.task);
     });
@@ -695,7 +402,7 @@ function renderCards() {
   window.scrollTo(0, scrollY);
 }
 
-// ── Init ─────────────────────────────────────────────────────
+// ── Start ────────────────────────────────────────────────────
 loadProgress();
 </script>
 </body>
