@@ -57,7 +57,7 @@
     .card-body { padding: 0 18px 14px; }
     .card-divider { width: 100%; height: 1px; background: #e8e4de; margin-bottom: 10px; }
     .hint-box { border-radius: 10px; padding: 8px 12px; margin-bottom: 10px; font-size: 12px; line-height: 1.6; border: 1px solid var(--color-border); background: var(--color-hint); color: var(--accent); }
-    .task-row { display: flex; align-items: flex-start; gap: 12px; padding: 9px 12px; border-radius: 10px; cursor: pointer; margin-bottom: 4px; background: transparent; transition: background 0.2s; user-select: none; }
+    .task-row { display: flex; align-items: flex-start; gap: 12px; padding: 9px 12px; border-radius: 10px; cursor: pointer; margin-bottom: 4px; transition: background 0.2s; user-select: none; }
     .task-row:hover { background: #f0ece4; }
     .task-row.done { background: var(--color-task-done); }
     .task-check { width: 20px; height: 20px; border-radius: 6px; border: 2px solid #c8c0b8; background: transparent; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; transition: all 0.2s; font-size: 12px; font-weight: 700; color: #fff; }
@@ -109,9 +109,9 @@
 </div>
 
 <script>
-const UPSTASH_URL   = "https://fluent-thrush-126067.upstash.io";
-const UPSTASH_TOKEN = "gQAAAAAAAexzAAIgcDFmNWIzZjAzY2UzNjM0Nzc1YjE5YjMyZDY4NDhkN2MxZA";
-const STORAGE_KEY   = "resume-tracker-v1";
+const BIN_ID    = "6a0866d2c0954111d8310ee2";
+const API_KEY   = "$2a$10$ID7RI2EtZ.j4sQcpG3TcD.0DqnQPYGmJayozPCxajV2PUpkgcbCVK";
+const BIN_URL   = "https://api.jsonbin.io/v3/b/" + BIN_ID;
 
 const SECTIONS = [
   {
@@ -202,88 +202,84 @@ const PHASES = [
 let progress = {};
 const openState = { 2: true };
 
-// ── Upstash ──────────────────────────────────────────────────
-async function upstashGet(key) {
-  const res = await fetch(`${UPSTASH_URL}/get/${encodeURIComponent(key)}`, {
-    headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
+// ── JSONBin ───────────────────────────────────────────────────
+async function loadFromBin() {
+  const res = await fetch(BIN_URL + "/latest", {
+    headers: { "X-Master-Key": API_KEY }
   });
-  if (!res.ok) throw new Error("GET " + res.status);
+  if (!res.ok) throw new Error("Load failed: " + res.status);
   const json = await res.json();
-  return json.result;
+  return json.record && json.record.progress ? json.record.progress : {};
 }
 
-async function upstashSet(key, value) {
-  const res = await fetch(`${UPSTASH_URL}/pipeline`, {
-    method: "POST",
+async function saveToBin(data) {
+  const res = await fetch(BIN_URL, {
+    method: "PUT",
     headers: {
-      Authorization: `Bearer ${UPSTASH_TOKEN}`,
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "X-Master-Key": API_KEY
     },
-    body: JSON.stringify([["SET", key, value]])
+    body: JSON.stringify({ progress: data })
   });
-  if (!res.ok) throw new Error("SET " + res.status);
+  if (!res.ok) throw new Error("Save failed: " + res.status);
 }
 
-// ── Badge ────────────────────────────────────────────────────
+// ── Badge ─────────────────────────────────────────────────────
 function setSyncBadge(state) {
   const el = document.getElementById("syncBadge");
   const map = {
     loading: ["載入中…",  "sync-loading"],
     saving:  ["儲存中…",  "sync-saving"],
     saved:   ["已同步 ✓", "sync-saved"],
-    error:   ["同步失敗 (離線模式)", "sync-error"],
+    error:   ["離線模式", "sync-error"],
   };
   const [text, cls] = map[state] || map.saved;
   el.textContent = text;
   el.className = "sync-badge " + cls;
 }
 
-// ── Load ─────────────────────────────────────────────────────
+// ── Load ──────────────────────────────────────────────────────
 async function loadProgress() {
   setSyncBadge("loading");
   try {
-    const raw = await upstashGet(STORAGE_KEY);
-    if (raw) {
-      try { progress = JSON.parse(raw); } catch(e) { console.warn("parse error", e); }
-    }
+    progress = await loadFromBin();
     setSyncBadge("saved");
   } catch(e) {
-    console.warn("Upstash load failed:", e);
+    console.warn("Load failed:", e);
     setSyncBadge("error");
   }
-  // Always render regardless of Upstash success/failure
   render();
 }
 
-// ── Save ─────────────────────────────────────────────────────
+// ── Save ──────────────────────────────────────────────────────
 async function saveProgress() {
   setSyncBadge("saving");
   try {
-    await upstashSet(STORAGE_KEY, JSON.stringify(progress));
+    await saveToBin(progress);
     setSyncBadge("saved");
     const el = document.getElementById("lastSaved");
     el.style.display = "block";
     el.textContent = "上次同步：" + new Date().toLocaleTimeString("zh-TW", { hour:"2-digit", minute:"2-digit" });
   } catch(e) {
-    console.warn("Upstash save failed:", e);
+    console.warn("Save failed:", e);
     setSyncBadge("error");
   }
 }
 
-// ── Toggle ───────────────────────────────────────────────────
+// ── Toggle ────────────────────────────────────────────────────
 function toggleTask(taskId) {
   progress[taskId] = !progress[taskId];
   render();
   saveProgress();
 }
 
-// ── Arc helper ───────────────────────────────────────────────
+// ── Arc helper ────────────────────────────────────────────────
 function arcDash(pct, r) {
-  const circ = 2 * Math.PI * r;
+  var circ = 2 * Math.PI * r;
   return ((pct / 100) * circ) + " " + circ;
 }
 
-// ── Render ───────────────────────────────────────────────────
+// ── Render ────────────────────────────────────────────────────
 function render() {
   renderOverall();
   renderPhases();
@@ -291,10 +287,10 @@ function render() {
 }
 
 function renderOverall() {
-  const all   = SECTIONS.flatMap(function(s) { return s.subtasks; });
-  const done  = all.filter(function(t) { return progress[t.id]; }).length;
-  const total = all.length;
-  const pct   = total ? Math.round((done / total) * 100) : 0;
+  var all   = SECTIONS.reduce(function(a, s) { return a.concat(s.subtasks); }, []);
+  var done  = all.filter(function(t) { return progress[t.id]; }).length;
+  var total = all.length;
+  var pct   = total ? Math.round((done / total) * 100) : 0;
   document.getElementById("overallPct").textContent   = pct + "%";
   document.getElementById("overallCount").textContent = done + " / " + total + " 項任務完成";
   document.getElementById("overallBar").style.width   = pct + "%";
@@ -302,18 +298,18 @@ function renderOverall() {
 }
 
 function renderPhases() {
-  const row = document.getElementById("phasesRow");
+  var row = document.getElementById("phasesRow");
   row.innerHTML = "";
   PHASES.forEach(function(ph) {
-    const allDone = ph.sectionIds.every(function(sid) {
-      const sec = SECTIONS.find(function(s) { return s.id === sid; });
+    var allDone = ph.sectionIds.every(function(sid) {
+      var sec = SECTIONS.filter(function(s) { return s.id === sid; })[0];
       return sec.subtasks.every(function(t) { return progress[t.id]; });
     });
-    const hasRemaining = ph.sectionIds.some(function(sid) {
-      const sec = SECTIONS.find(function(s) { return s.id === sid; });
+    var hasRemaining = ph.sectionIds.some(function(sid) {
+      var sec = SECTIONS.filter(function(s) { return s.id === sid; })[0];
       return sec.subtasks.some(function(t) { return !progress[t.id]; });
     });
-    const card = document.createElement("div");
+    var card = document.createElement("div");
     card.className = "phase-card" + (allDone ? " done" : hasRemaining ? " active" : "");
     card.innerHTML = "<div class='phase-day'>" + ph.day + "</div><div class='phase-name'>" +
       (allDone ? "✓ " : hasRemaining ? "▶ " : "") + ph.label + "</div>";
@@ -322,18 +318,18 @@ function renderPhases() {
 }
 
 function renderCards() {
-  const container = document.getElementById("cardsContainer");
-  const scrollY = window.scrollY;
+  var container = document.getElementById("cardsContainer");
+  var scrollY = window.scrollY;
   container.innerHTML = "";
 
   SECTIONS.forEach(function(sec) {
-    const done    = sec.subtasks.filter(function(t) { return progress[t.id]; }).length;
-    const total   = sec.subtasks.length;
-    const pct     = Math.round((done / total) * 100);
-    const complete = pct === 100;
-    const isOpen  = !!openState[sec.id];
+    var done    = sec.subtasks.filter(function(t) { return progress[t.id]; }).length;
+    var total   = sec.subtasks.length;
+    var pct     = Math.round((done / total) * 100);
+    var complete = pct === 100;
+    var isOpen  = !!openState[sec.id];
 
-    const card = document.createElement("div");
+    var card = document.createElement("div");
     card.className = "card" + (complete ? " complete" : "");
     card.style.setProperty("--color",           sec.color);
     card.style.setProperty("--accent",          sec.accent);
@@ -343,7 +339,7 @@ function renderCards() {
     card.style.setProperty("--color-border",    sec.color + "60");
     card.style.setProperty("--color-task-done", sec.color + "18");
 
-    const subtasksHTML = sec.subtasks.map(function(task) {
+    var subtasksHTML = sec.subtasks.map(function(task) {
       return "<div class='task-row" + (progress[task.id] ? " done" : "") + "' data-task='" + task.id + "'>" +
         "<div class='task-check'>" + (progress[task.id] ? "✓" : "") + "</div>" +
         "<span class='task-label'>" + task.label + "</span></div>";
@@ -382,16 +378,14 @@ function renderCards() {
     container.appendChild(card);
   });
 
-  // Header click → toggle open
   container.querySelectorAll(".card-header").forEach(function(el) {
     el.addEventListener("click", function() {
-      const id = parseInt(el.dataset.id);
+      var id = parseInt(el.dataset.id);
       openState[id] = !openState[id];
       renderCards();
     });
   });
 
-  // Task click → toggle done
   container.querySelectorAll(".task-row").forEach(function(el) {
     el.addEventListener("click", function(e) {
       e.stopPropagation();
@@ -402,7 +396,6 @@ function renderCards() {
   window.scrollTo(0, scrollY);
 }
 
-// ── Start ────────────────────────────────────────────────────
 loadProgress();
 </script>
 </body>
